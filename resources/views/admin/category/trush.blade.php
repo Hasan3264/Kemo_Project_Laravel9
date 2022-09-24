@@ -17,7 +17,7 @@
             </div>
 
             <div class="card-body">
-                <form action="{{route('hard.delete')}}" method="POST">
+                <form id="catmarkdel" >
                     @csrf
                     <table class="table table-bordered">
                         <thead>
@@ -33,9 +33,9 @@
                         </thead>
                         <tbody>
                             @foreach ($trash_cat as $key=> $trash)
-                            <tr>
+                            <tr id="tr_{{$trash->id}}">
 
-                                <td> <input type="checkbox" class="xxy" name="mark[]" value="{{$trash->id}}"></td>
+                                <td> <input type="checkbox" class="xxy" data-id="{{$trash->id}}" name="mark[]" value="{{$trash->id}}"></td>
                                 <td>{{$key+1}}</td>
                                 <td> @php
                                     if(App\Models\User::where('id', $trash->user_id)->exists()){
@@ -49,13 +49,14 @@
                                 <td>{{$trash->created_at->diffForHumans()}}</td>
                                 <td>{{$trash->deleted_at->diffForHumans()}}</td>
                                 <td>
-                                    <button type="button" value="{{route('re.store', $trash->id)}}"  class="restore btn btn-success shadow btn-xs sharp mt-2">Re</button>
+                                    <a href="javascript:void(0)" data-url="{{route('re.store', $trash->id)}}" class="btn btn-danger shadow btn-xs sharp restore">Re</a>
+                                    <a href="" data-tr="tr_{{$trash->id}}"></a>
                                 </td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
-                    <button type="submit" class='btn btn-primary'>Delete All</button>
+                    <button type="button" data-url="{{url('/hard/delete')}}" type="button"  id="trushcat"  class='btn btn-primary'>Delete All</button>
                 </form>
 
             </div>
@@ -68,6 +69,65 @@
 
 
 @section('js_code')
+<script>
+      $('#trushcat').on('click', function() {
+            var allVals = [];  
+            $(".xxy:checked").each(function() {  
+                allVals.push($(this).attr('data-id'));
+            });  
+            if(allVals.length <=0)  
+            {  
+                alert("Please select row.");  
+            }  else {  
+                      Swal.fire({
+             title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+             confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+             if (result.isConfirmed) {
+                var url = $(this).attr('data-id');
+                    var join_selected_values = allVals.join(","); 
+                    $.ajax({
+                        url: $(this).data('url'),
+                        type: 'POST',
+                        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                        data: 'ids='+join_selected_values,
+                     success: function (data) {
+                            if (data['success']) {
+                                $(".xxy:checked").each(function() {  
+                                    $(this).parents("tr").remove();
+                                });
+                                    Swal.fire(
+                                        'Deleted!',
+                                        'Deleted success',
+                                        'success'
+                                    )
+                            } else if (data['error']) {
+                                        Swal.fire(
+                                        'Error',
+                                        'Something Wrong!',
+                                        'success'
+                                         )
+                            } else {
+                                alert('Whoops Something went wrong!!');
+                            }
+                        },
+                        error: function (data) {
+                            alert(data.responseText);
+                        }
+                    });
+                  $.each(allVals, function( index, value ) {
+                      $('table tr').filter("[data-row-id='" + value + "']").remove();
+                  });
+                }
+      });  
+            }  
+        });
+</script>
 <script>
     $("#trash_mark").click(function () {
         $('.xxy').not(this).prop('checked', this.checked);
@@ -95,7 +155,13 @@
 <script>
     $(document).ready(function(){
          $('.restore').click(function(){
-            var link=$(this).val();
+            var userURL = $(this).data('url');
+            var trObj = $(this);
+                $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        }
+                    });
             Swal.fire({
                   title: 'Are you sure?',
                   text: "To Store Again This",
@@ -106,7 +172,19 @@
                   confirmButtonText: 'Yes, Restore it!'
                   }).then((result) => {
                   if (result.isConfirmed) {
-                     window.location.href = link;
+                    $.ajax({
+                        url: userURL,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                             trObj.parents("tr").hide(),2000;
+                             Swal.fire(
+                                        'Done!',
+                                        data.success,
+                                        'success'
+                                    )
+                         }
+                });
 
                   }
                   })

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\Models\User;
 use Carbon\Carbon;
+use DB;
 use Illuminate\support\Facades\Auth;
 use Intervention\Image\Facades\Image;
 use Illuminate\Http\Request;
@@ -77,15 +78,18 @@ class CategoryController extends Controller
         return back()->with('Categoryerr','Category Filds Must be fillup');
        }
     }
-    function catagory_soft_delete($categorysoftdlt_id){
-        category::find($categorysoftdlt_id)->delete();
-        return back()->with('delete','Category deletion Done');
+    function catagory_soft_delete($id){
+         category::find($id)->delete();
+         return response()->json(['success'=>"Products Deleted successfully."]);
+        // return back()->with('delete','Category deletion Done');
     }
     function mark_delete(Request $request){
-        foreach($request->mark as $mark){
-            category::find($mark)->delete();
-        }
-        return back()->with('alldelete','All Deleted');
+       
+        $ids = $request->ids;  
+         category::whereIn('id', explode(",",$ids))->delete();
+         return response()->json(['success'=>"Products Deleted successfully."]);
+            
+        
     }
     function trushed(){
         $trash_cat=category::onlyTrashed()->get();
@@ -94,13 +98,12 @@ class CategoryController extends Controller
         ]);
     }
     function hard_delete(Request $request){
-        foreach($request->mark as $mark){
-        category::onlyTrashed()->find($mark)->forceDelete();
-        }
-        return back()->with('alldelete','All Category Was permanently delete');
+        $ids = $request->ids;
+        category::onlyTrashed()->whereIn('id', explode(",",$ids))->forceDelete();
+        return response()->json(['success'=>"Products Deleted successfully."]);
     }
     function restore($restore_id){
      category::where('id', $restore_id)->restore();
-     return back()->with('allrestore','Category  Restored');
-  }
+     return response()->json(['success'=>"Products Restored successfully."]);
+   }
 }

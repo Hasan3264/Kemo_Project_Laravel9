@@ -963,6 +963,9 @@
                     <ul aria-expanded="false">
                         <li><a href="{{route('category')}}">See Category</a></li>
                     </ul>
+                    <ul aria-expanded="false">
+                        <li><a href="{{route('subcategory')}}">See Sub Category</a></li>
+                    </ul>
                 </li>
 
                 </ul>
@@ -1033,6 +1036,29 @@
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
     <!-- Dashboard 1 -->
     <script src="{{asset('/deshboard/js/dashboard/dashboard-1.js')}}"></script>
+    <script>
+        getusername(); 
+     function getusername(){
+       $.ajaxSetup({
+        headers: {
+        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+      }
+    });
+    $.ajax({
+        url: "/get/username",
+        type:'GET',
+        dataType:'json',
+         success:function(response){
+                // console.log(response.categores)
+                $.each(response.categores, function(key, item){
+                    $('select').append(
+                        '<option value="'+item.id+'">'+item.category_name+'</option>'
+                    );
+                });
+         }
+    });
+}
+    </script>
     <script>
         function carouselReview() {
             /*  testimonial one function by = owl.carousel.js */

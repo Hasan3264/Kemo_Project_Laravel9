@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\SubCategoryController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -25,6 +26,7 @@ Route::get('/',[FrontendController::class, 'welcome']);
 Auth::routes();
 // deshboard
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/get/username', [HomeController::class, 'user']);
 // deshboard
 // users part
 Route::get('/users', [AdminController::class, 'users'])->name('user.list');
@@ -42,6 +44,12 @@ Route::post('/CatEdit', [CategoryController::class, 'cat_edit'])->name('category
 Route::get('/catsoft/del/{cat_id}', [CategoryController::class, 'catagory_soft_delete'])->name('cat.softdelete');
 Route::post('/mark/delete', [CategoryController::class, 'mark_delete']);
 Route::get('/Trushed/Categories', [CategoryController::class, 'trushed'])->name('trushed');
-Route::post('/mark/hard/delete', [CategoryController::class, 'hard_delete'])->name('hard.delete');
+Route::post('/hard/delete', [CategoryController::class, 'hard_delete']);
 Route::get('/restore/{restore_id}', [CategoryController::class, 'restore'])->name('re.store');
 // category part
+// sub category part
+  Route::get('subcategory',[SubCategoryController::class,'subcategory'])->name('subcategory');
+  Route::get('/get/gategory',[SubCategoryController::class,'getcategory']);
+  Route::post('/insert',[SubCategoryController::class,'insert'])->name('subcat.add');
+  Route::get('/get/sub_gategory',[SubCategoryController::class,'get_subcategory']);
+// sub category part

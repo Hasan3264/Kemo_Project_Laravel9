@@ -27,5 +27,11 @@ class HomeController extends Controller
     {
         return view('home');
     }
+    function user(){
+        $categores =category::all();
+          return response()->json([
+            'categores' =>$categores,
+          ]);
+       }
     
 }
